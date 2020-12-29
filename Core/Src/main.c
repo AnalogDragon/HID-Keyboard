@@ -120,7 +120,6 @@ int main(void)
   //键盘扫描定时器，20K / 9 = 2.2K，滤波3次，刷新率大概在730Hz
   //商用键盘扫描频率通常在250Hz左右
  	HAL_TIM_Base_Start_IT(&htim6);
-  //HAL_SPI_Transmit_DMA(&hspi1,KeyboardData1,sizeof(KeyboardData1));
   
   
   while (1){
@@ -175,7 +174,10 @@ int main(void)
 		
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
-      KeyboardLedTask();
+       KeyboardLedTask();
+      if((SysTime.SysTimeCNT10ms & 1) == 0){ //50Hz
+        BackLedTask();
+      }
 		}
 		
 		if(SysTime.SysTimeFLG100ms){
@@ -186,7 +188,6 @@ int main(void)
 		if(SysTime.SysTimeFLG1s){
 			SysTime.SysTimeFLG1s = 0;
       ModeChangeTask();
-//       HAL_SPI_Transmit_DMA(&hspi1,(uint8_t*)SPIData0,sizeof(SPIData0));
 		}
 		
 		if(SysTime.SysTimeFLG1min){
@@ -343,7 +344,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;

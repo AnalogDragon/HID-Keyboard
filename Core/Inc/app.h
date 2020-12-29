@@ -14,6 +14,7 @@ void SetPowerBLE(uint8_t sta);
 void KeyboardTask(void);
 void ModeChangeTask(void);
 void KeyboardLedTask(void);
+void BackLedTask(void);
 
 
 #endif

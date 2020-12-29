@@ -182,9 +182,6 @@ extern uint8_t key_keep_num;
 
 /*----------------------------*/
 
-extern const uint32_t SPIData0[120];
-
-
 
 
 

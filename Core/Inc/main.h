@@ -36,6 +36,7 @@ extern "C" {
 #include "VarDefine.h"
 #include "Keyboard.h"
 #include "app.h"
+#include "LED.h"
   
   
 //IO口操作宏定义

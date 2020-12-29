@@ -2,9 +2,9 @@
 #include "string.h"
 
 
-
+//0：正常键盘
+//1：12键键盘（maimai外设）
 #define mode_keyboard 0
-
 
 
 //配置输出LED

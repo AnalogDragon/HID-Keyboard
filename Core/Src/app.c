@@ -47,12 +47,14 @@ void SetPower(uint8_t sta){
   PowerLock_IO = (sta != 0);
 }
 
+
 //蓝牙芯片电源开启
 void SetPowerBLE(uint8_t sta){
   BLEPowerLock_IO = (sta != 0);
 }
 
 
+//键盘键值发送/更新
 void KeyboardTask(void){
   static uint8_t ClearKeyboard = 0;
   static uint8_t KEY_FN_OUT = 0;
@@ -122,7 +124,6 @@ void KeyboardTask(void){
     
   }
   
-  
   ////keyboard key send
   if((key_fresh & 1) != 0){
     key_fresh &= ~1;
@@ -156,6 +157,7 @@ void KeyboardTask(void){
 void ModeChangeTask(void){
   
   if(SysState == USB_MODE){
+    key_keep_num = USB_MODE_LEN;
     if(hUsbDeviceFS.dev_state != USBD_STATE_CONFIGURED){  //usb断开
       memset(KeyboardOutData,0,sizeof(KeyboardOutData));
       SetKeyboardLED(0);
@@ -164,6 +166,7 @@ void ModeChangeTask(void){
     }
   }
   else if(SysState == BLE_MODE){
+    key_keep_num = BLE_MODE_LEN;
     if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED){  //usb连接
       SysState = USB_MODE;
       key_keep_num = USB_MODE_LEN;
@@ -185,6 +188,13 @@ void KeyboardLedTask(void){
     }
   }
 }
+
+
+void BackLedTask(void){
+  DispOnce();
+}
+
+
 
 
 
