@@ -1,4 +1,0 @@
--c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../USB_DEVICE/App -I../USB_DEVICE/Target -I../Core/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Middlewares/ST/STM32_USB_Device_Library/Core/Inc -I../Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include --C99 
--I "H:\program files\Keil 4\ARM\RV31\INC" 
--I "H:\program files\Keil 4\ARM\CMSIS\Include" 
--DUSE_HAL_DRIVER -DSTM32F103xE -o "KeyBoard\stm32f1xx_ll_usb.o" --omf_browse "KeyBoard\stm32f1xx_ll_usb.crf" --depend "KeyBoard\stm32f1xx_ll_usb.d" "../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usb.c"

@@ -163,16 +163,11 @@ extern struct SysTime_REG SysTime;
 extern const uint8_t KeyValueDef[KEY_COL_NUM][KEY_ROW_NUM];
 extern const uint8_t KeyFNValueDef[KEY_COL_NUM][KEY_ROW_NUM];
 
-extern uint16_t KeyDataLast1[KEY_COL_NUM];
-extern uint16_t KeyDataLast2[KEY_COL_NUM];
-extern uint16_t KeyDataNow[KEY_COL_NUM];
-extern uint16_t KeyDataOut[KEY_COL_NUM];
-
 //按键键值
-extern uint8_t key_fresh;
+extern uint8_t key_fresh; //键值刷新
 extern uint8_t key_buff[KEY_COL_NUM * KEY_ROW_NUM];
-extern uint8_t key_buff2;
-extern uint8_t key_buff3;
+extern uint8_t key_buff2; //GUI
+extern uint8_t key_buff3; //media
 
 #define HID_EPIN_SIZE                 64
 #define HID_EPIN_SIZE2                2

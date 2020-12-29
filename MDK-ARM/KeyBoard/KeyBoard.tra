@@ -46,7 +46,7 @@
 ### ADS-LD Output File: 'KeyBoard\KeyBoard.axf'
 ### ADS-LD Command File: 'KeyBoard\KeyBoard.lnp'
 ### Checking for dirty Components...
-### Creating CmdFile 'KeyBoard\KeyBoard.lnp', Handle=0x00003F2C
+### Creating CmdFile 'KeyBoard\KeyBoard.lnp', Handle=0x00002748
 ### Writing '.lnp' file
 ### ADS-LD Command file 'KeyBoard\KeyBoard.lnp' is ready.
 ### ADS-LD: About to start ADS-LD Thread.

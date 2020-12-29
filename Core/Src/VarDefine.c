@@ -69,11 +69,6 @@ const uint8_t KeyFNValueDef[KEY_COL_NUM][KEY_ROW_NUM] = {
 };
 
 
-uint16_t KeyDataLast1[KEY_COL_NUM] = {0};
-uint16_t KeyDataLast2[KEY_COL_NUM] = {0};
-uint16_t KeyDataNow[KEY_COL_NUM] = {0};
-uint16_t KeyDataOut[KEY_COL_NUM] = {0};
-
 //°´¼ü¼üÖµ
 uint8_t key_fresh = 0;
 uint8_t key_buff[KEY_COL_NUM * KEY_ROW_NUM] = {0};
