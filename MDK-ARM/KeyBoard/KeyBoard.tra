@@ -1,0 +1,55 @@
+*** Creating Trace Output File 'KeyBoard\KeyBoard.tra' Ok.
+### Preparing for ADS-LD.
+### Creating ADS-LD Command Line
+### List of Objects: adding '"keyboard\startup_stm32f103xe.o"'
+### List of Objects: adding '"keyboard\vardefine.o"'
+### List of Objects: adding '"keyboard\app.o"'
+### List of Objects: adding '"keyboard\keyboard.o"'
+### List of Objects: adding '"keyboard\main.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_it.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_msp.o"'
+### List of Objects: adding '"keyboard\usb_device.o"'
+### List of Objects: adding '"keyboard\usbd_desc.o"'
+### List of Objects: adding '"keyboard\usbd_conf.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_gpio_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_pcd.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_pcd_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_ll_usb.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_rcc.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_rcc_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_gpio.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_dma.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_cortex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_pwr.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_flash.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_flash_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_exti.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_adc.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_adc_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_iwdg.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_spi.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_tim.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_tim_ex.o"'
+### List of Objects: adding '"keyboard\stm32f1xx_hal_uart.o"'
+### List of Objects: adding '"keyboard\system_stm32f1xx.o"'
+### List of Objects: adding '"keyboard\usbd_core.o"'
+### List of Objects: adding '"keyboard\usbd_ctlreq.o"'
+### List of Objects: adding '"keyboard\usbd_ioreq.o"'
+### List of Objects: adding '"keyboard\usbd_hid.o"'
+### ADS-LD Command completed:
+--cpu Cortex-M3 "keyboard\startup_stm32f103xe.o" "keyboard\vardefine.o" "keyboard\app.o" "keyboard\keyboard.o" "keyboard\main.o" "keyboard\stm32f1xx_it.o" "keyboard\stm32f1xx_hal_msp.o" "keyboard\usb_device.o" "keyboard\usbd_desc.o" "keyboard\usbd_conf.o" "keyboard\stm32f1xx_hal_gpio_ex.o" "keyboard\stm32f1xx_hal_pcd.o" "keyboard\stm32f1xx_hal_pcd_ex.o" "keyboard\stm32f1xx_ll_usb.o" "keyboard\stm32f1xx_hal.o" "keyboard\stm32f1xx_hal_rcc.o" "keyboard\stm32f1xx_hal_rcc_ex.o" "keyboard\stm32f1xx_hal_gpio.o" "keyboard\stm32f1xx_hal_dma.o" "keyboard\stm32f1xx_hal_cortex.o" "keyboard\stm32f1xx_hal_pwr.o" "keyboard\stm32f1xx_hal_flash.o" "keyboard\stm32f1xx_hal_flash_ex.o" "keyboard\stm32f1xx_hal_exti.o" "keyboard\stm32f1xx_hal_adc.o" "keyboard\stm32f1xx_hal_adc_ex.o" "keyboard\stm32f1xx_hal_iwdg.o" "keyboard\stm32f1xx_hal_spi.o" "keyboard\stm32f1xx_hal_tim.o" "keyboard\stm32f1xx_hal_tim_ex.o" "keyboard\stm32f1xx_hal_uart.o" "keyboard\system_stm32f1xx.o" "keyboard\usbd_core.o" "keyboard\usbd_ctlreq.o" "keyboard\usbd_ioreq.o" "keyboard\usbd_hid.o" 
+--library_type=microlib --strict --scatter "KeyBoard\KeyBoard.sct" 
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list "KeyBoard.map" -o KeyBoard\KeyBoard.axf### Preparing Environment (PrepEnvAds)
+### ADS-LD Output File: 'KeyBoard\KeyBoard.axf'
+### ADS-LD Command File: 'KeyBoard\KeyBoard.lnp'
+### Checking for dirty Components...
+### Creating CmdFile 'KeyBoard\KeyBoard.lnp', Handle=0x00003F2C
+### Writing '.lnp' file
+### ADS-LD Command file 'KeyBoard\KeyBoard.lnp' is ready.
+### ADS-LD: About to start ADS-LD Thread.
+### ADS-LD: executed with 0 errors
+### Updating obj list
+### LDADS_file() completed.
