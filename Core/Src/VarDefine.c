@@ -83,6 +83,10 @@ uint8_t KeyboardInData[HID_EPIN_SIZE] = {0};
 uint8_t key_keep_num = 6;
 
 
+uint8_t UsartTxBuffer[UART_LEN] = {0};
+uint8_t UsartRxBuffer[UART_LEN] = {0};
+uint8_t UsartRxOut[UART_LEN] = {0};
+
 
 uint8_t SysState = 0;
 

@@ -217,6 +217,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
+#include "string.h"
 
 /** @addtogroup STM32F1xx_HAL_Driver
   * @{
@@ -261,6 +262,8 @@ static void UART_DMARxOnlyAbortCallback(DMA_HandleTypeDef *hdma);
 static HAL_StatusTypeDef UART_Transmit_IT(UART_HandleTypeDef *huart);
 static HAL_StatusTypeDef UART_EndTransmit_IT(UART_HandleTypeDef *huart);
 static HAL_StatusTypeDef UART_Receive_IT(UART_HandleTypeDef *huart);
+static HAL_StatusTypeDef UART_Receive_IT_mine(UART_HandleTypeDef *huart);
+static HAL_StatusTypeDef UART_IDLE_IT_mine(UART_HandleTypeDef *huart);
 static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef *huart, uint32_t Flag, FlagStatus Status, uint32_t Tickstart, uint32_t Timeout);
 static void UART_SetConfig(UART_HandleTypeDef *huart);
 
@@ -1287,6 +1290,50 @@ HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData,
   }
 }
 
+HAL_StatusTypeDef HAL_UART_Receive_IT_mine(UART_HandleTypeDef *huart, uint8_t *pBuffData, uint8_t *pOutData, uint16_t Size)
+{
+  /* Check that a Rx process is not already ongoing */
+  if (huart->RxState == HAL_UART_STATE_READY)
+  {
+    if ((pBuffData == NULL) || (Size == 0U))
+    {
+      return HAL_ERROR;
+    }
+
+    /* Process Locked */
+    __HAL_LOCK(huart);
+
+    huart->pRxBuffPtr = pBuffData;
+    huart->pRxOutPtr = pOutData;
+    huart->RxXferSize = Size;
+    huart->RxXferCount = 0;
+
+    huart->ErrorCode = HAL_UART_ERROR_NONE;
+    huart->RxState = HAL_UART_STATE_BUSY_RX;
+
+    /* Process Unlocked */
+    __HAL_UNLOCK(huart);
+
+    /* Enable the UART Parity Error Interrupt */
+    __HAL_UART_ENABLE_IT(huart, UART_IT_PE);
+
+    /* Enable the UART Error Interrupt: (Frame error, noise error, overrun error) */
+    __HAL_UART_ENABLE_IT(huart, UART_IT_ERR);
+
+    /* Enable the UART Data Register not empty Interrupt */
+    __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
+    
+    /* Enable the UART IDLE Interrupt */
+    __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+
+    return HAL_OK;
+  }
+  else
+  {
+    return HAL_BUSY;
+  }
+}
+
 /**
   * @brief  Sends an amount of data in DMA mode.
   * @note   When UART parity is not enabled (PCE = 0), and Word Length is configured to 9 bits (M1-M0 = 01),
@@ -2159,6 +2206,99 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef *huart)
     return;
   }
 }
+
+
+
+void HAL_UART_IRQHandler_mine(UART_HandleTypeDef *huart)
+{
+  uint32_t isrflags   = READ_REG(huart->Instance->SR);
+  uint32_t cr1its     = READ_REG(huart->Instance->CR1);
+  uint32_t cr3its     = READ_REG(huart->Instance->CR3);
+  uint32_t errorflags = 0x00U;
+
+  /* If no error occurs */
+  errorflags = (isrflags & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE));
+  if (errorflags == RESET)
+  {
+    /* UART in mode Receiver -------------------------------------------------*/
+    if (((isrflags & USART_SR_RXNE) != RESET) && ((cr1its & USART_CR1_RXNEIE) != RESET))
+    {
+      UART_Receive_IT_mine(huart);
+      return;
+    }
+    /* UART IDLE Interrupt   -------------------------------------------------*/
+    if (((isrflags & USART_SR_IDLE) != RESET) && ((cr1its & USART_CR1_IDLEIE) != RESET))
+    {
+      UART_IDLE_IT_mine(huart);
+      return;
+    }
+  }
+
+  /* If some errors occur */
+  if ((errorflags != RESET) && (((cr3its & USART_CR3_EIE) != RESET) || ((cr1its & (USART_CR1_RXNEIE | USART_CR1_PEIE)) != RESET)))
+  {
+    /* UART parity error interrupt occurred ----------------------------------*/
+    if (((isrflags & USART_SR_PE) != RESET) && ((cr1its & USART_CR1_PEIE) != RESET))
+    {
+      huart->ErrorCode |= HAL_UART_ERROR_PE;
+    }
+
+    /* UART noise error interrupt occurred -----------------------------------*/
+    if (((isrflags & USART_SR_NE) != RESET) && ((cr3its & USART_CR3_EIE) != RESET))
+    {
+      huart->ErrorCode |= HAL_UART_ERROR_NE;
+    }
+
+    /* UART frame error interrupt occurred -----------------------------------*/
+    if (((isrflags & USART_SR_FE) != RESET) && ((cr3its & USART_CR3_EIE) != RESET))
+    {
+      huart->ErrorCode |= HAL_UART_ERROR_FE;
+    }
+
+    /* UART Over-Run interrupt occurred --------------------------------------*/
+    if (((isrflags & USART_SR_ORE) != RESET) && (((cr1its & USART_CR1_RXNEIE) != RESET) || ((cr3its & USART_CR3_EIE) != RESET)))
+    {
+      huart->ErrorCode |= HAL_UART_ERROR_ORE;
+    }
+
+    /* Call UART Error Call back function if need be --------------------------*/
+    if (huart->ErrorCode != HAL_UART_ERROR_NONE)
+    {
+      /* UART in mode Receiver -----------------------------------------------*/
+      if (((isrflags & USART_SR_RXNE) != RESET) && ((cr1its & USART_CR1_RXNEIE) != RESET))
+      {
+        UART_Receive_IT_mine(huart);
+      }
+      
+      //clear ore error
+      if((huart->ErrorCode & HAL_UART_ERROR_ORE) != RESET){
+        
+        __HAL_UART_CLEAR_OREFLAG(huart);
+        
+      }
+      
+      huart->ErrorCode = HAL_UART_ERROR_NONE;
+    }
+    return;
+  } /* End if some error occurs */
+
+  /* UART in mode Transmitter ------------------------------------------------*/
+  if (((isrflags & USART_SR_TXE) != RESET) && ((cr1its & USART_CR1_TXEIE) != RESET))
+  {
+    UART_Transmit_IT(huart);
+    return;
+  }
+
+  /* UART in mode Transmitter end --------------------------------------------*/
+  if (((isrflags & USART_SR_TC) != RESET) && ((cr1its & USART_CR1_TCIE) != RESET))
+  {
+    UART_EndTransmit_IT(huart);
+    return;
+  }
+  
+}
+
+
 
 /**
   * @brief  Tx Transfer completed callbacks.
@@ -3045,6 +3185,80 @@ static HAL_StatusTypeDef UART_Receive_IT(UART_HandleTypeDef *huart)
   {
     return HAL_BUSY;
   }
+}
+
+
+static HAL_StatusTypeDef UART_Receive_IT_mine(UART_HandleTypeDef *huart)
+{
+  uint8_t  *pdata8bits;
+  uint16_t *pdata16bits;
+  uint16_t temp;
+
+  temp = huart->Instance->DR;
+  
+  /* Check that a Rx process is ongoing */
+  if (huart->RxState == HAL_UART_STATE_BUSY_RX)
+  {
+    if ((huart->Init.WordLength == UART_WORDLENGTH_9B) && (huart->Init.Parity == UART_PARITY_NONE))
+    {
+      //检查越位
+      if((huart->RxXferSize >= 2) && (huart->RxXferCount <= (huart->RxXferSize - 2)))
+      {
+        pdata16bits = (uint16_t *) huart->pRxBuffPtr;
+        pdata16bits[huart->RxXferCount/2] = (uint16_t)(temp & (uint16_t)0x01FF);
+        huart->RxXferCount += 2;
+      }
+      
+    }
+    else
+    {
+      //检查越位
+      if((huart->RxXferSize >= 1) && (huart->RxXferCount <= (huart->RxXferSize - 1)))
+      {
+        pdata8bits = (uint8_t *) huart->pRxBuffPtr;
+        if ((huart->Init.WordLength == UART_WORDLENGTH_9B) || ((huart->Init.WordLength == UART_WORDLENGTH_8B) && (huart->Init.Parity == UART_PARITY_NONE)))
+        {
+          pdata8bits[huart->RxXferCount] = (uint8_t)(temp & (uint8_t)0x00FF);
+        }
+        else
+        {
+          pdata8bits[huart->RxXferCount] = (uint8_t)(temp & (uint8_t)0x007F);
+        }
+        huart->RxXferCount ++;
+      }
+    }
+    
+
+#if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
+      /*Call registered Rx complete callback*/
+    huart->RxCpltCallback(huart);
+#else
+      /*Call legacy weak Rx complete callback*/
+    HAL_UART_RxCpltCallback(huart);
+#endif /* USE_HAL_UART_REGISTER_CALLBACKS */
+    
+    return HAL_OK;
+  }
+  else
+  {
+    return HAL_BUSY;
+  }
+}
+
+
+static HAL_StatusTypeDef UART_IDLE_IT_mine(UART_HandleTypeDef *huart)
+{
+  
+  __HAL_UART_CLEAR_IDLEFLAG(huart);
+  
+  if(huart->RxDataSize == 0){
+    memcpy(huart->pRxOutPtr, huart->pRxBuffPtr, huart->RxXferCount);
+    huart->RxDataSize = huart->RxXferCount;
+  }
+  
+  huart->RxXferCount = 0;
+  
+  return HAL_OK;
 }
 
 /**

@@ -37,6 +37,7 @@ extern "C" {
 #include "Keyboard.h"
 #include "app.h"
 #include "LED.h"
+#include "uart.h"
   
   
 //IO口操作宏定义

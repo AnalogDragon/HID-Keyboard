@@ -34,7 +34,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -121,6 +120,8 @@ int main(void)
   //商用键盘扫描频率通常在250Hz左右
  	HAL_TIM_Base_Start_IT(&htim6);
   
+  //串口rx
+  HAL_UART_Receive_IT_mine(&huart1, UsartRxBuffer, UsartRxOut, UART_LEN);
   
   while (1){
     
@@ -170,11 +171,12 @@ int main(void)
 		if(SysTime.SysTimeFLG1ms){
 			SysTime.SysTimeFLG1ms = 0;
       KeyboardTask(); //1%
+      UsartTask();
 		}
 		
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
-       KeyboardLedTask();
+      KeyboardLedTask();
       if((SysTime.SysTimeCNT10ms & 1) == 0){ //50Hz
         BackLedTask();
       }

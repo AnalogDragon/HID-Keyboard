@@ -110,7 +110,7 @@ static uint16_t KeyDataBak[KEY_COL_NUM] = {0};
 
 
 //刷新键值
-//hal库浪费时间过多,目前占用小于10%
+//hal库浪费时间多，重写
 /**
   * @brief This function handles TIM6 global interrupt.
   */

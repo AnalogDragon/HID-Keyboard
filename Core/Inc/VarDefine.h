@@ -182,10 +182,13 @@ extern uint8_t key_keep_num;
 
 /*----------------------------*/
 
+#define UART_LEN 300
 
+extern uint8_t UsartTxBuffer[UART_LEN];
+extern uint8_t UsartRxBuffer[UART_LEN];
+extern uint8_t UsartRxOut[UART_LEN];
 
-
-
+/*----------------------------*/
 
 #define USB_MODE 1
 #define BLE_MODE 2
@@ -194,8 +197,8 @@ extern uint8_t SysState;
 
 
 //不同模式发送的长度
-#define USB_MODE_LEN 61
-#define BLE_MODE_LEN 10
+#define USB_MODE_LEN 60 //usb 模式最多可60键无冲
+#define BLE_MODE_LEN 20 //ble 模式最多可20键无冲
 
 
 

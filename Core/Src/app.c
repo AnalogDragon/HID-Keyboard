@@ -2,6 +2,7 @@
 #include "usb_device.h"
 #include "string.h"
 
+extern UART_HandleTypeDef huart1;
 
 
 //1ms系统时钟
@@ -51,6 +52,15 @@ void SetPower(uint8_t sta){
 //蓝牙芯片电源开启
 void SetPowerBLE(uint8_t sta){
   BLEPowerLock_IO = (sta != 0);
+}
+
+
+//计算CRC
+uint16_t CRCCheck(uint8_t *pData, uint16_t size){
+  uint16_t CRC_result = 0xFFFF;
+  
+  
+  return CRC_result;
 }
 
 
@@ -195,6 +205,19 @@ void BackLedTask(void){
 }
 
 
+
+//串口通信响应
+void UsartTask(void){
+  
+  if(huart1.RxDataSize != 0){
+    
+    
+    
+    
+    
+    huart1.RxDataSize = 0;
+  }
+}
 
 
 
