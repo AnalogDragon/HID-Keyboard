@@ -116,7 +116,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   
-  //键盘扫描定时器，20K / 9 = 2.2K，滤波3次，刷新率大概在730Hz
+  //键盘扫描定时器，19K / 9 = 2.1K，滤波3次，刷新率大概在700Hz左右
   //商用键盘扫描频率通常在250Hz左右
  	HAL_TIM_Base_Start_IT(&htim6);
   
@@ -171,11 +171,11 @@ int main(void)
 		if(SysTime.SysTimeFLG1ms){
 			SysTime.SysTimeFLG1ms = 0;
       KeyboardTask(); //1%
-      UsartTask();
 		}
 		
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
+      UartRecTask();
       KeyboardLedTask();
       if((SysTime.SysTimeCNT10ms & 1) == 0){ //50Hz
         BackLedTask();
@@ -384,7 +384,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 12-1;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 200-1;
+  htim6.Init.Period = 210-1;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {

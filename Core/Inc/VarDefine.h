@@ -3,6 +3,9 @@
 #include "main.h"
 
 
+#define Version 1.00
+
+
 struct SysTime_REG
 {
 	volatile uint16_t SysTimeCNT1ms;
@@ -23,6 +26,7 @@ struct SysTime_REG
 
 /*----------------------------*/
 
+//¾ØÕó³ß´ç
 #define KEY_COL_NUM           9
 #define KEY_ROW_NUM           12
 
@@ -182,12 +186,38 @@ extern uint8_t key_keep_num;
 
 /*----------------------------*/
 
+#define UART_BLE_ADDR       0x01
+
+
 #define UART_LEN 300
+
+//BLE Ä£¿é·¢ËÍ×´Ì¬
+extern uint8_t  BLETxFlag;
+extern uint16_t BLETxTime;
+extern uint16_t BLERxTime;
 
 extern uint8_t UsartTxBuffer[UART_LEN];
 extern uint8_t UsartRxBuffer[UART_LEN];
 extern uint8_t UsartRxOut[UART_LEN];
 
+struct BLE_STATE_DEF{
+  uint8_t LEDState    :8;
+  
+  uint8_t LinkID      :4;
+  uint8_t LinkSta     :1;
+  uint8_t ReSendReq   :1;
+  uint8_t res0        :2;
+  
+  uint8_t res1        :8;
+  uint8_t res2        :8;
+};
+
+union BLE_STATE_UNI{
+  struct BLE_STATE_DEF bit;
+  uint8_t all[4];
+};
+
+extern union BLE_STATE_UNI BleState;
 /*----------------------------*/
 
 #define USB_MODE 1

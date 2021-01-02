@@ -56,11 +56,29 @@ void SetPowerBLE(uint8_t sta){
 
 
 //计算CRC
-uint16_t CRCCheck(uint8_t *pData, uint16_t size){
-  uint16_t CRC_result = 0xFFFF;
+uint16_t CRCCheck(uint8_t *pData, uint16_t Size){
+  uint16_t crc_result = 0xFFFF;
   
-  
-  return CRC_result;
+  for(uint16_t i=0;i<Size;i++)
+  {
+      crc_result ^= pData[i];
+      for(uint8_t j=0;j<8;j++)
+      {
+          if(crc_result&0x01)
+              crc_result=(crc_result>>1)^0xa001;
+          else
+              crc_result=crc_result>>1;
+      }
+  }
+  return crc_result;
+}
+
+//获取时间差
+uint16_t GetDtTime(uint16_t TimeBuf,uint16_t TimeBase){
+  if(TimeBuf > TimeBase)
+    return 60000 - TimeBuf + TimeBase;
+  else
+    return TimeBase - TimeBuf;
 }
 
 
@@ -79,6 +97,8 @@ void KeyboardTask(void){
         KEY_FN_COUNT = 0;
       }
     }
+    else
+      KEY_FN_COUNT = 0;
   }
   else{
     if(KEY_FN_OUT != 0){
@@ -88,13 +108,15 @@ void KeyboardTask(void){
         KEY_FN_COUNT = 0;
       }
     }
+    else
+      KEY_FN_COUNT = 0;
   }
   
   //根据FN键不同，查询键表
   if(KEY_FN_OUT){ //后续需要加软件滤波
     
     //进入FN清除普通输入
-    if(ClearKeyboard == 0){ 
+    if(ClearKeyboard == 0){
       ClearKeyboard = 1;
       ResetKeyValue();
       if(SysState == USB_MODE){
@@ -104,11 +126,9 @@ void KeyboardTask(void){
         KeyboardInData[0] = 2;  //set ID
         while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE2));
       }
-      else{//uart send
-      }
     }
     
-    //获取正常键值
+    //获取FN键值
     GetKeyValue((uint8_t (*)[KEY_ROW_NUM])KeyFNValueDef);
     
   }
@@ -125,40 +145,37 @@ void KeyboardTask(void){
         KeyboardInData[0] = 2;  //set ID
         while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE2));
       }
-      else{//uart send
-      }
     }
     
-    //获取FN键值
+    //获取正常键值
     GetKeyValue((uint8_t (*)[KEY_ROW_NUM])KeyValueDef);
     
   }
   
-  ////keyboard key send
-  if((key_fresh & 1) != 0){
-    key_fresh &= ~1;
-    if(SysState == USB_MODE){
+  if(SysState == USB_MODE){
+    
+    ////keyboard key send
+    if((key_fresh & 1) != 0){
+      key_fresh &= ~1;
       KeyboardInData[0] = 1;  //set ID
       KeyboardInData[1] = key_buff2;  // key
       memcpy(&KeyboardInData[3],key_buff,key_keep_num); //键值
       while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE));
     }
-    else{//uart send
-    }
-  }
-  
-  ////media key send
-  if((key_fresh & 2) != 0){
-    key_fresh &= ~2;
-    if(SysState == USB_MODE){
+    
+    ////media key send
+    if((key_fresh & 2) != 0){
+      key_fresh &= ~2;
       KeyboardInData[0] = 2;  //set ID
       KeyboardInData[1] = key_buff3;  // key
       while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE2));
     }
-    else{//uart send
-    }
+    
   }
-  
+  else{ //BLE
+    SendBLE(key_fresh);
+    key_fresh = 0;
+  }
   
 }
 
@@ -207,16 +224,30 @@ void BackLedTask(void){
 
 
 //串口通信响应
-void UsartTask(void){
-  
+void UartRecTask(void){
+  uint16_t temp;
   if(huart1.RxDataSize != 0){
-    
-    
-    
-    
-    
+    if(huart1.pRxOutPtr[0] == 0xA5 && huart1.RxDataSize == (huart1.pRxOutPtr[2] + 5)){  //帧头
+      temp = CRCCheck(huart1.pRxOutPtr, huart1.RxDataSize-2);
+      temp ^= ((uint16_t)huart1.pRxOutPtr[huart1.RxDataSize-2] << 8) | huart1.pRxOutPtr[huart1.RxDataSize-1];
+      if(temp == 0){  //CRC校验通过
+        
+        switch(huart1.pRxOutPtr[1]){
+          
+          case UART_BLE_ADDR:
+            GetBLE();
+            break;
+          
+          default:
+            break;
+          
+        } //end of switch
+        
+      }
+    }
     huart1.RxDataSize = 0;
   }
+  
 }
 
 

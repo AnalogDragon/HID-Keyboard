@@ -4,4 +4,17 @@
 
 
 
+
+
+
+
+
+
+void SendBLE(uint8_t mode);
+void GetBLE(void);
+
+
+
+
+
 #endif

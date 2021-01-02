@@ -83,9 +83,17 @@ uint8_t KeyboardInData[HID_EPIN_SIZE] = {0};
 uint8_t key_keep_num = 6;
 
 
+//BLE 模块发送状态
+uint8_t  BLETxFlag = 0; //置1发送，置0接收成功
+uint16_t BLETxTime = 0;
+uint16_t BLERxTime = 0;
+
 uint8_t UsartTxBuffer[UART_LEN] = {0};
 uint8_t UsartRxBuffer[UART_LEN] = {0};
 uint8_t UsartRxOut[UART_LEN] = {0};
+
+union BLE_STATE_UNI BleState;
+
 
 
 uint8_t SysState = 0;

@@ -4,7 +4,7 @@
 
 //0：正常键盘
 //1：12键键盘（maimai外设）
-#define mode_keyboard 0
+#define mode_keyboard       0
 
 
 //配置输出LED
@@ -93,6 +93,131 @@ void ReadKeyCall(void){
   
 }
 #endif
+
+
+
+
+
+//判断ctrl等
+uint8_t CheckKeyValue(uint8_t Val){
+  const uint8_t KeyMin = Keyboard_LeftControl;
+  const uint8_t KeyMax = Keyboard_RightGUI;
+  
+  if(Val >= KeyMin && Val <= KeyMax){
+    return 1 << (Val-KeyMin);
+  }
+  return 0;
+}
+
+
+//判断media
+uint8_t CheckKeyMediaValue(uint8_t Val){
+  const uint8_t KeyMin = Mediakey_mute;
+  const uint8_t KeyMax = Mediakey_next;
+  
+  if(Val >= KeyMin && Val <= KeyMax){
+    return 1 << (Val-KeyMin);
+  }
+  return 0;
+}
+
+
+//增加一个值
+void AddKeyValue(uint8_t Value){
+  uint8_t i,temp;
+  
+  if(Value == 0){
+    return;
+  }
+  
+  temp = CheckKeyValue(Value);
+  if(temp != 0){
+    key_buff2 |= temp;
+    key_fresh |= 1; //keyboard
+    return;
+  }
+  
+  temp = CheckKeyMediaValue(Value);
+  if(temp != 0){
+    key_buff3 |= temp;
+    key_fresh |= 2; //media
+    return;
+  }
+  
+  for(i = 0; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
+    if(key_buff[i] == 0){
+      key_buff[i] = Value;
+      if(i < key_keep_num){
+        key_fresh |= 1; //keyboard
+      }
+      return;
+    }
+  }
+  
+}
+
+//减去一个值
+void SubKeyValue(uint8_t Value){
+  uint8_t i,temp;
+  
+  if(Value == 0){
+    return;
+  }
+  
+  temp = CheckKeyValue(Value);
+  if(temp != 0){
+    key_buff2 &= ~temp;
+    key_fresh |= 1; //keyboard
+    return;
+  }
+  
+  temp = CheckKeyMediaValue(Value);
+  if(temp != 0){
+    key_buff3 &= ~temp;
+    key_fresh |= 2; //media
+    return;
+  }
+  
+  //从保持范围内减去
+  for(i = 0; i < key_keep_num; i++){
+    
+    if(key_buff[i] == Value){
+      key_buff[i] = key_buff[key_keep_num]; //取出一个待发送值，可以是0
+      if(key_buff[key_keep_num] != 0){          //后面有数据，进行移动
+        for(i = key_keep_num; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
+          key_buff[i] = key_buff[i+1];
+          if(key_buff[i+1] == 0){               //判断尾
+            break;
+          }
+        }
+        key_buff[i] = 0;
+      }
+      key_fresh |= 1; //keyboard
+      return;
+    }
+    
+  }
+  
+  //缓存删除
+  for(i = key_keep_num; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
+    if(key_buff[i] == Value){
+        for(i = i; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
+          key_buff[i] = key_buff[i+1];
+          if(key_buff[i+1] == 0){               //判断尾
+            break;
+          }
+        }
+        key_buff[i] = 0;
+        return;
+    }
+    if(key_buff[i] == 0){
+      return;
+    }
+  }
+  
+}
+
+
 
 
 #if (mode_keyboard == 0)
@@ -199,125 +324,6 @@ void TIM6_IRQHandler(void)
 
 
 
-//判断ctrl等
-uint8_t CheckKeyValue(uint8_t Val){
-  const uint8_t KeyMin = Keyboard_LeftControl;
-  const uint8_t KeyMax = Keyboard_RightGUI;
-  
-  if(Val >= KeyMin && Val <= KeyMax){
-    return 1 << (Val-KeyMin);
-  }
-  return 0;
-}
-
-
-//判断media
-uint8_t CheckKeyMediaValue(uint8_t Val){
-  const uint8_t KeyMin = Mediakey_mute;
-  const uint8_t KeyMax = Mediakey_next;
-  
-  if(Val >= KeyMin && Val <= KeyMax){
-    return 1 << (Val-KeyMin);
-  }
-  return 0;
-}
-
-
-//增加一个值
-void AddKeyValue(uint8_t Value){
-  uint8_t i,temp;
-  
-  if(Value == 0){
-    return;
-  }
-  
-  temp = CheckKeyValue(Value);
-  if(temp != 0){
-    key_buff2 |= temp;
-    key_fresh |= 1; //keyboard
-    return;
-  }
-  
-  temp = CheckKeyMediaValue(Value);
-  if(temp != 0){
-    key_buff3 |= temp;
-    key_fresh |= 2; //media
-    return;
-  }
-  
-  for(i = 0; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
-    if(key_buff[i] == 0){
-      key_buff[i] = Value;
-      if(i < key_keep_num){
-        key_fresh |= 1; //keyboard
-      }
-      return;
-    }
-  }
-  
-}
-
-//减去一个值
-void SubKeyValue(uint8_t Value){
-  uint8_t i,temp;
-  
-  if(Value == 0){
-    return;
-  }
-  
-  temp = CheckKeyValue(Value);
-  if(temp != 0){
-    key_buff2 &= ~temp;
-    key_fresh |= 1; //keyboard
-    return;
-  }
-  
-  temp = CheckKeyMediaValue(Value);
-  if(temp != 0){
-    key_buff3 &= ~temp;
-    key_fresh |= 2; //media
-    return;
-  }
-  
-  //从保持范围内减去
-  for(i = 0; i < key_keep_num; i++){
-    if(key_buff[i] == Value){
-      key_buff[i] = key_buff[key_keep_num + 1]; //取出一个待发送值，可以是0
-      if(key_buff[key_keep_num] != 0){          //后面有数据，进行移动
-        for(i = key_keep_num; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
-          key_buff[i] = key_buff[i+1];
-          if(key_buff[i+1] == 0){               //判断尾
-            break;
-          }
-        }
-        key_buff[KEY_COL_NUM * KEY_ROW_NUM-1] = 0;
-      }
-      key_fresh |= 1; //keyboard
-      return;
-    }
-  }
-  
-  //缓存删除
-  for(i = key_keep_num; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
-    if(key_buff[i] == Value){
-        for(i = i; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
-          key_buff[i] = key_buff[i+1];
-          if(key_buff[i+1] == 0){               //判断尾
-            break;
-          }
-        }
-        key_buff[KEY_COL_NUM * KEY_ROW_NUM-1] = 0;
-        return;
-    }
-    if(key_buff[i] == 0){
-      return;
-    }
-  }
-  
-}
-
-
-
 void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
   uint8_t NoPressFlag = 0;
   static uint8_t PressedFlag = 0;
@@ -354,7 +360,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
             KeyDataBak[i] |= 1<<j;
             AddKeyValue(pKeyValueDef[i][j]);
             key_fresh_bak |= key_fresh;
-            if(key_fresh != 0){ //按键插入了，退出发送hid
+            if(key_fresh != 0 && SysState == USB_MODE){ //按键插入了，退出发送hid
               return;
             }
           }
@@ -365,9 +371,29 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
           }
         }
       }
-      
     }
     if(KeyDataOut[i] != 0)NoPressFlag = 1;
+  }
+  
+  //蓝牙模式 检测是否空余
+  if(SysState == BLE_MODE && key_buff[key_keep_num] != 0){
+    for(uint8_t i = 0; i < key_keep_num; i++){
+      if(key_buff[i] == 0){
+        key_buff[i] = key_buff[key_keep_num];
+        
+        for(i = key_keep_num; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
+          key_buff[i] = key_buff[i+1];
+          if(key_buff[i+1] == 0){               //判断尾
+            break;
+          }
+        }
+        key_buff[i] = 0;
+        
+        if(key_buff[key_keep_num] == 0){        //末尾无数据
+          break;
+        }
+      }
+    }
   }
   
   if(NoPressFlag == 0 && PressedFlag != 0){//按键全清，并且按过按键
@@ -382,8 +408,6 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
 
 
 
-
-
 void ResetKeyValue(void){
   key_buff2 = 0;
   key_buff3 = 0;
@@ -392,11 +416,11 @@ void ResetKeyValue(void){
 }
 
 
+
 #else
 
 
 /*后面是maimai单按键*/
-
 
 
 //mai键位表
@@ -417,6 +441,7 @@ const uint8_t KeyMaiFNValueDef[KEY_ROW_NUM] = {
 //滤波长度调整
 #define FILTERSEC  1
 #define FILTERTIME  (20 * FILTERSEC)
+
 
 //按键缓存
 static uint16_t KeyMaiData[FILTERTIME] = {0};
@@ -452,126 +477,6 @@ void TIM6_IRQHandler(void)
 }
 
 
-//判断ctrl等
-uint8_t CheckKeyValue(uint8_t Val){
-  const uint8_t KeyMin = Keyboard_LeftControl;
-  const uint8_t KeyMax = Keyboard_RightGUI;
-  
-  if(Val >= KeyMin && Val <= KeyMax){
-    return 1 << (Val-KeyMin);
-  }
-  return 0;
-}
-
-
-//判断media
-uint8_t CheckKeyMediaValue(uint8_t Val){
-  const uint8_t KeyMin = Mediakey_mute;
-  const uint8_t KeyMax = Mediakey_next;
-  
-  if(Val >= KeyMin && Val <= KeyMax){
-    return 1 << (Val-KeyMin);
-  }
-  return 0;
-}
-
-
-//增加一个值
-void AddKeyValue(uint8_t Value){
-  uint8_t i,temp;
-  
-  if(Value == 0){
-    return;
-  }
-  
-  temp = CheckKeyValue(Value);
-  if(temp != 0){
-    key_buff2 |= temp;
-    key_fresh |= 1; //keyboard
-    return;
-  }
-  
-  temp = CheckKeyMediaValue(Value);
-  if(temp != 0){
-    key_buff3 |= temp;
-    key_fresh |= 2; //media
-    return;
-  }
-  
-  for(i = 0; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
-    if(key_buff[i] == 0){
-      key_buff[i] = Value;
-      if(i < key_keep_num){
-        key_fresh |= 1; //keyboard
-      }
-      return;
-    }
-  }
-  
-}
-
-//减去一个值
-void SubKeyValue(uint8_t Value){
-  uint8_t i,temp;
-  
-  if(Value == 0){
-    return;
-  }
-  
-  temp = CheckKeyValue(Value);
-  if(temp != 0){
-    key_buff2 &= ~temp;
-    key_fresh |= 1; //keyboard
-    return;
-  }
-  
-  temp = CheckKeyMediaValue(Value);
-  if(temp != 0){
-    key_buff3 &= ~temp;
-    key_fresh |= 2; //media
-    return;
-  }
-  
-  //从保持范围内减去
-  for(i = 0; i < key_keep_num; i++){
-    if(key_buff[i] == Value){
-      key_buff[i] = key_buff[key_keep_num + 1]; //取出一个待发送值，可以是0
-      if(key_buff[key_keep_num] != 0){          //后面有数据，进行移动
-        for(i = key_keep_num; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
-          key_buff[i] = key_buff[i+1];
-          if(key_buff[i+1] == 0){               //判断尾
-            break;
-          }
-        }
-        key_buff[KEY_COL_NUM * KEY_ROW_NUM-1] = 0;
-      }
-      key_fresh |= 1; //keyboard
-      return;
-    }
-  }
-  
-  //缓存删除
-  for(i = key_keep_num; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
-    if(key_buff[i] == Value){
-        for(i = i; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
-          key_buff[i] = key_buff[i+1];
-          if(key_buff[i+1] == 0){               //判断尾
-            break;
-          }
-        }
-        key_buff[KEY_COL_NUM * KEY_ROW_NUM-1] = 0;
-        return;
-    }
-    if(key_buff[i] == 0){
-      return;
-    }
-  }
-  
-}
-
-
-
-//
 
 
 void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
@@ -604,7 +509,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
           KeyDataOutBak |= 1<<j;
           AddKeyValue(pKeyMaiValueDef[j]);
           key_fresh_bak |= key_fresh;
-          if(key_fresh != 0){ //按键插入了，退出发送hid
+          if(key_fresh != 0 && SysState == USB_MODE){ //按键插入了，退出发送hid
             return;
           }
         }
@@ -617,6 +522,26 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
     }
   }
   
+  //蓝牙模式 检测是否空余
+  if(SysState == BLE_MODE && key_buff[key_keep_num] != 0){
+    for(uint8_t i = 0; i < key_keep_num; i++){
+      if(key_buff[i] == 0){
+        key_buff[i] = key_buff[key_keep_num];
+        
+        for(i = key_keep_num; i < (KEY_COL_NUM * KEY_ROW_NUM - 1); i++){
+          key_buff[i] = key_buff[i+1];
+          if(key_buff[i+1] == 0){               //判断尾
+            break;
+          }
+        }
+        key_buff[i] = 0;
+        
+        if(key_buff[key_keep_num] == 0){        //末尾无数据
+          break;
+        }
+      }
+    }
+  }
 
   if(KeyMaiDataOut == 0 && PressedFlag != 0){ //按键全清，并且按过按键
     PressedFlag = 0;
