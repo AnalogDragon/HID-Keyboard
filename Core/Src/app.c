@@ -334,6 +334,27 @@ void BLEMonitorTask(void){
 
 
 
+void SaveDataTask(void){
+  static uint8_t NeedtoSave_Bak = 0;
+  static uint16_t time;
+  
+  if(NeedtoSave != NeedtoSave_Bak){
+    NeedtoSave_Bak = NeedtoSave;
+    time = SysTime.SysTimeCNT100ms;
+  }
+  else{
+    //5秒后保存数据
+    if(NeedtoSave != 0 && GetDtTime(time, SysTime.SysTimeCNT100ms) > 50){
+      NeedtoSave = 0;
+      NeedtoSave_Bak = 0;
+      if(SaveDataOnce() != HAL_OK){
+        /*存储出错*/
+      }
+    }
+  }
+}
+
+
 void InitData(void){
   memset(SaveData.All, 0, sizeof(SaveData.All));
   SaveData.Data.Data.Data.Key.Color = 0;

@@ -280,7 +280,6 @@ union SAVEDATA_UNO{
 struct SAVEDATA_ALL_DEF{
   uint16_t Verify;
   union SAVEDATA_UNO Data;
-  uint16_t Len;
   uint16_t Head;
 };
 
@@ -289,8 +288,8 @@ union SAVEDATA_ALL_UNO{
   uint16_t All[(sizeof(struct SAVEDATA_ALL_DEF) + 1) / 2];
 };
 
+extern uint8_t NeedtoSave;
 extern union SAVEDATA_ALL_UNO SaveData;
-
 
 
 

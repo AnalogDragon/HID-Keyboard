@@ -9,11 +9,11 @@
 #define FLASH_TAIL_ADDR     (FLASH_BASE_ADDR + FLASH_FULL_SIZE)
 
 //´æ´¢Ò³µÄÊýÁ¿
-#define FLASH_SAVE_PAGE     2
+#define FLASH_SAVE_PAGE     1
 #define FLASH_SAVE_SIZE     (FLASH_SAVE_PAGE * FLASH_PAGE_SIZE)
 #define FLASH_SAVE_ADDR     (FLASH_TAIL_ADDR - FLASH_SAVE_SIZE)
 
-#define FLASH_ONCE_SIZE     ((sizeof(SaveData) + 1) / 2)
+#define FLASH_ONCE_SIZE     (sizeof(SaveData) / 2)
 
 
 

@@ -183,6 +183,7 @@ int main(void)
       KeyboardLedTask();
       if((SysTime.SysTimeCNT10ms & 1) == 0){ //50Hz
         BackLedTask();
+        SaveDataTask();
       }
 		}
 		

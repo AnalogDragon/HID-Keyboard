@@ -100,6 +100,8 @@ uint8_t BLE_CMD = 0;
 
 struct SYSSTATE_DEF SysState = {0};
 
+
+uint8_t NeedtoSave = 0;
 union SAVEDATA_ALL_UNO SaveData;
 
 
