@@ -116,6 +116,9 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   
+  //存储数据提取
+  SaveDataInit();
+  
   //键盘扫描定时器，19K / 9 = 2.1K，滤波3次，刷新率大概在700Hz左右
   //商用键盘扫描频率通常在250Hz左右
  	HAL_TIM_Base_Start_IT(&htim6);

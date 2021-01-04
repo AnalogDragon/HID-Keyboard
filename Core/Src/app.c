@@ -334,7 +334,12 @@ void BLEMonitorTask(void){
 
 
 
-
+void InitData(void){
+  memset(SaveData.All, 0, sizeof(SaveData.All));
+  SaveData.Data.Data.Data.Key.Color = 0;
+  SaveData.Data.Data.Data.Key.Flame = 1;
+  SaveData.Data.Data.Data.Key.HotKey = 0;
+}
 
 
 

@@ -259,14 +259,37 @@ extern struct SYSSTATE_DEF SysState;
 
 
 
+/*----------------------------*/
 
 
+struct SAVEDATA_KEY_DEF{
+  uint8_t Color;
+  uint8_t Flame;
+  uint8_t HotKey;
+};
 
+struct SAVEDATA_DEF{
+  struct SAVEDATA_KEY_DEF Key;
+};
 
+union SAVEDATA_UNO{
+  struct SAVEDATA_DEF Data;
+  uint8_t All[sizeof(struct SAVEDATA_DEF)];
+};
 
+struct SAVEDATA_ALL_DEF{
+  uint16_t Verify;
+  union SAVEDATA_UNO Data;
+  uint16_t Len;
+  uint16_t Head;
+};
 
+union SAVEDATA_ALL_UNO{
+  struct SAVEDATA_ALL_DEF Data;
+  uint16_t All[(sizeof(struct SAVEDATA_ALL_DEF) + 1) / 2];
+};
 
-
+extern union SAVEDATA_ALL_UNO SaveData;
 
 
 

@@ -21,6 +21,9 @@ void UartRecTask(void);
 void BLEMonitorTask(void);
 
 
+void InitData(void);
+
+
 
 #endif
 
