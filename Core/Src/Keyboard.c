@@ -122,6 +122,19 @@ uint8_t CheckKeyMediaValue(uint8_t Val){
 }
 
 
+//判断BLE
+uint8_t CheckKeyBLEValue(uint8_t Val){
+  const uint8_t KeyMin = BLEK_Disconnect;
+  const uint8_t KeyMax = BLEK_ClearBind;
+  
+  if(Val >= KeyMin && Val <= KeyMax){
+    return Val;
+  }
+  return 0;
+}
+
+
+
 //增加一个值
 void AddKeyValue(uint8_t Value){
   uint8_t i,temp;
@@ -143,6 +156,15 @@ void AddKeyValue(uint8_t Value){
     key_fresh |= 2; //media
     return;
   }
+  
+  temp = CheckKeyBLEValue(Value);
+  if(temp != 0){
+    if(BLE_CMD == 0){
+      BLE_CMD = temp;
+    }
+    return;
+  }
+  
   
   for(i = 0; i < KEY_COL_NUM * KEY_ROW_NUM; i++){
     if(key_buff[i] == 0){
@@ -175,6 +197,14 @@ void SubKeyValue(uint8_t Value){
   if(temp != 0){
     key_buff3 &= ~temp;
     key_fresh |= 2; //media
+    return;
+  }
+  
+  temp = CheckKeyBLEValue(Value);
+  if(temp != 0){
+    if(BLE_CMD == temp){
+      BLE_CMD = 0;  //BLE
+    }
     return;
   }
   
@@ -216,8 +246,6 @@ void SubKeyValue(uint8_t Value){
   }
   
 }
-
-
 
 
 #if (mode_keyboard == 0)
@@ -360,7 +388,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
             KeyDataBak[i] |= 1<<j;
             AddKeyValue(pKeyValueDef[i][j]);
             key_fresh_bak |= key_fresh;
-            if(key_fresh != 0 && SysState == USB_MODE){ //按键插入了，退出发送hid
+            if(key_fresh != 0 && SysState.COM == USB_MODE){ //按键插入了，退出发送hid
               return;
             }
           }
@@ -376,7 +404,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
   }
   
   //蓝牙模式 检测是否空余
-  if(SysState == BLE_MODE && key_buff[key_keep_num] != 0){
+  if(SysState.COM == BLE_MODE && key_buff[key_keep_num] != 0){
     for(uint8_t i = 0; i < key_keep_num; i++){
       if(key_buff[i] == 0){
         key_buff[i] = key_buff[key_keep_num];
@@ -399,8 +427,10 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
   if(NoPressFlag == 0 && PressedFlag != 0){//按键全清，并且按过按键
     PressedFlag = 0;
     key_buff2 = 0;
+    key_buff3 = 0;
+    BLE_CMD = 0;
     memset(key_buff,0,sizeof(key_buff));
-    key_fresh = key_fresh_bak;
+    key_fresh = key_fresh_bak;  //刷新更改过的值
     key_fresh_bak = 0;
   }
   
@@ -411,6 +441,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
 void ResetKeyValue(void){
   key_buff2 = 0;
   key_buff3 = 0;
+  BLE_CMD = 0;
   memset(key_buff,0,sizeof(key_buff));
   memset(KeyDataBak,0,sizeof(KeyDataBak));
 }
@@ -546,6 +577,8 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
   if(KeyMaiDataOut == 0 && PressedFlag != 0){ //按键全清，并且按过按键
     PressedFlag = 0;
     key_buff2 = 0;
+    key_buff3 = 0;
+    BLE_CMD = 0;
     memset(key_buff,0,sizeof(key_buff));
     key_fresh = key_fresh_bak;
     key_fresh_bak = 0;
@@ -558,6 +591,7 @@ void GetKeyValue(uint8_t (*pKeyValueDef)[KEY_ROW_NUM]){
 void ResetKeyValue(void){
   key_buff2 = 0;
   key_buff3 = 0;
+  BLE_CMD = 0;
   memset(key_buff,0,sizeof(key_buff));
   KeyDataOutBak = 0;
 }

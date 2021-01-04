@@ -87,6 +87,7 @@ uint8_t key_keep_num = 6;
 uint8_t  BLETxFlag = 0; //置1发送，置0接收成功
 uint16_t BLETxTime = 0;
 uint16_t BLERxTime = 0;
+uint16_t BLEErrCnt = 0;
 
 uint8_t UsartTxBuffer[UART_LEN] = {0};
 uint8_t UsartRxBuffer[UART_LEN] = {0};
@@ -94,9 +95,10 @@ uint8_t UsartRxOut[UART_LEN] = {0};
 
 union BLE_STATE_UNI BleState;
 
+//BLE发送命令
+uint8_t BLE_CMD = 0;
 
-
-uint8_t SysState = 0;
+struct SYSSTATE_DEF SysState = {0};
 
 
 

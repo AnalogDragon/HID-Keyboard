@@ -138,7 +138,7 @@ extern "C" {
 #define LED3_IO               PCout(2)
 
 
-#define KEY_FN                0
+#define KEY_FN                (FIN_IO == 0)
 
 
 

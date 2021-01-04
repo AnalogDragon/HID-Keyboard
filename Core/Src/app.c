@@ -119,7 +119,7 @@ void KeyboardTask(void){
     if(ClearKeyboard == 0){
       ClearKeyboard = 1;
       ResetKeyValue();
-      if(SysState == USB_MODE){
+      if(SysState.COM == USB_MODE){
         memset(KeyboardInData,0,sizeof(KeyboardInData));
         KeyboardInData[0] = 1;  //set ID
         while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE));
@@ -138,7 +138,7 @@ void KeyboardTask(void){
     if(ClearKeyboard == 1){
       ClearKeyboard = 0;
       ResetKeyValue();
-      if(SysState == USB_MODE){
+      if(SysState.COM == USB_MODE){
         memset(KeyboardInData,0,sizeof(KeyboardInData));
         KeyboardInData[0] = 1;  //set ID
         while(USBD_OK != USBD_HID_SendReport(&hUsbDeviceFS,(uint8_t*)KeyboardInData,HID_EPIN_SIZE));
@@ -152,7 +152,7 @@ void KeyboardTask(void){
     
   }
   
-  if(SysState == USB_MODE){
+  if(SysState.COM == USB_MODE){
     
     ////keyboard key send
     if((key_fresh & 1) != 0){
@@ -173,8 +173,10 @@ void KeyboardTask(void){
     
   }
   else{ //BLE
-    SendBLE(key_fresh);
-    key_fresh = 0;
+    if(SysState.BLE != 0){
+      SendBLE(key_fresh);
+      key_fresh = 0;
+    }
   }
   
 }
@@ -183,19 +185,19 @@ void KeyboardTask(void){
 //模式切换
 void ModeChangeTask(void){
   
-  if(SysState == USB_MODE){
+  if(SysState.COM == USB_MODE){
     key_keep_num = USB_MODE_LEN;
     if(hUsbDeviceFS.dev_state != USBD_STATE_CONFIGURED){  //usb断开
       memset(KeyboardOutData,0,sizeof(KeyboardOutData));
       SetKeyboardLED(0);
-      SysState = BLE_MODE;
+      SysState.COM = BLE_MODE;
       key_keep_num = BLE_MODE_LEN;
     }
   }
-  else if(SysState == BLE_MODE){
+  else if(SysState.COM == BLE_MODE){
     key_keep_num = BLE_MODE_LEN;
     if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED){  //usb连接
-      SysState = USB_MODE;
+      SysState.COM = USB_MODE;
       key_keep_num = USB_MODE_LEN;
     }
   }
@@ -226,15 +228,19 @@ void BackLedTask(void){
 //串口通信响应
 void UartRecTask(void){
   uint16_t temp;
+  
   if(huart1.RxDataSize != 0){
-    if(huart1.pRxOutPtr[0] == 0xA5 && huart1.RxDataSize == (huart1.pRxOutPtr[2] + 5)){  //帧头
+    
+    if(huart1.pRxOutPtr[0] == UART_HEAR_RX && huart1.RxDataSize == (huart1.pRxOutPtr[2] + 5)){  //帧头
       temp = CRCCheck(huart1.pRxOutPtr, huart1.RxDataSize-2);
       temp ^= ((uint16_t)huart1.pRxOutPtr[huart1.RxDataSize-2] << 8) | huart1.pRxOutPtr[huart1.RxDataSize-1];
-      if(temp == 0){  //CRC校验通过
+      
+      if(temp == 0){  //CRC Verify
         
         switch(huart1.pRxOutPtr[1]){
           
           case UART_BLE_ADDR:
+            //BLE模块的回复
             GetBLE();
             break;
           
@@ -243,12 +249,108 @@ void UartRecTask(void){
           
         } //end of switch
         
-      }
+      }//end of verify
+      
     }
     huart1.RxDataSize = 0;
-  }
+  }//end of data get
   
 }
+
+//BLE模块操作函数
+void BLEMonitorTask(void){
+  static uint8_t step = 0;
+  static uint16_t time;
+  static uint8_t flag;
+  
+  //切出BLE模式
+  if(SysState.COM != BLE_MODE){
+    if(flag){
+      memset(BleState.all, 0, sizeof(BleState.all));
+      SysState.BLE = 0;
+      SetPowerBLE(0);
+      step = 0;
+    }
+    return;
+  }
+  
+  switch(step){
+    
+    case 0:
+      //power on
+      flag = 1;
+      SysState.BLE = 0;
+      SetPowerBLE(1);
+      time = SysTime.SysTimeCNT10ms;
+      step ++;
+      break;
+      
+    case 1:
+      //wait power on 1s
+      if(GetDtTime(time, SysTime.SysTimeCNT10ms) > 100){
+        time = SysTime.SysTimeCNT10ms;
+        SysState.BLE = 1;
+        step ++;
+      }
+      break;
+      
+    case 2:
+      //wait uart comm 0.5s
+      if(GetDtTime(time, SysTime.SysTimeCNT10ms) > 50){
+        BLEErrCnt = 0;
+        step ++;
+      }
+      break;
+      
+    case 3:
+      //idle
+      if(BLEErrCnt > 20){
+        //20次数据包丢失
+        memset(KeyboardOutData,0,sizeof(KeyboardOutData));
+        memset(BleState.all, 0, sizeof(BleState.all));
+        SysState.BLE = 0;
+        SetPowerBLE(0);
+        SetKeyboardLED(0);
+        time = SysTime.SysTimeCNT10ms;
+        step ++;
+      }
+      break;
+      
+    case 4:
+      //wait power off 0.5s
+      if(GetDtTime(time, SysTime.SysTimeCNT10ms) > 50){
+        step = 0;
+      }
+      break;
+      
+    default:
+      SysState.BLE = 0;
+      SetPowerBLE(0);
+      time = SysTime.SysTimeCNT10ms;
+      step = 4;
+      break;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

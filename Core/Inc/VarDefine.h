@@ -138,6 +138,18 @@ struct SysTime_REG
 #define Keyboard_Apps             101 // Keyboard Application
 
 
+#define BLEK_Disconnect           110
+#define BLEK_ConnectID1           111
+#define BLEK_ConnectID2           112
+#define BLEK_ConnectID3           113
+#define BLEK_ConnectID4           114
+#define BLEK_ConnectID5           115
+#define BLEK_ConnectID6           116
+#define BLEK_ConnectID7           117
+#define BLEK_ConnectID8           118
+#define BLEK_ClearBind            119
+
+
 #define Mediakey_mute             200
 #define Mediakey_volp             201
 #define Mediakey_voln             202
@@ -186,6 +198,9 @@ extern uint8_t key_keep_num;
 
 /*----------------------------*/
 
+#define UART_HEAR_TX        0xA5
+#define UART_HEAR_RX        0x5A
+
 #define UART_BLE_ADDR       0x01
 
 
@@ -195,6 +210,7 @@ extern uint8_t key_keep_num;
 extern uint8_t  BLETxFlag;
 extern uint16_t BLETxTime;
 extern uint16_t BLERxTime;
+extern uint16_t BLEErrCnt;
 
 extern uint8_t UsartTxBuffer[UART_LEN];
 extern uint8_t UsartRxBuffer[UART_LEN];
@@ -218,12 +234,22 @@ union BLE_STATE_UNI{
 };
 
 extern union BLE_STATE_UNI BleState;
+
+extern uint8_t BLE_CMD;
+
 /*----------------------------*/
 
 #define USB_MODE 1
 #define BLE_MODE 2
 
-extern uint8_t SysState;
+
+struct SYSSTATE_DEF{
+  uint8_t COM;
+  uint8_t BLE;
+};
+
+
+extern struct SYSSTATE_DEF SysState;
 
 
 //不同模式发送的长度

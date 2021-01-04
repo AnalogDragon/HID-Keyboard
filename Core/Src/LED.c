@@ -31,6 +31,7 @@ static uint32_t SPIData[LED_NUM * 3];
 extern SPI_HandleTypeDef hspi1;
 
 
+//显示发送，将GRAM转换发送
 void DispOnce(void){
   uint32_t temp0;
   
@@ -97,7 +98,6 @@ static uint8_t LED_State = 1;         //LED开关
 static uint8_t LED_DispMode = 0;      //显示模式
 static uint8_t LED_ColorMode = 0;     //颜色模式
 static uint8_t LED_HotkeyMode = 0;    //热键模式
-
 
 
 /*

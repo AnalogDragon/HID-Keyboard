@@ -132,7 +132,7 @@ int main(void)
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
       if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED){  //连接上USB直接判断为USB模式
-        SysState = USB_MODE;
+        SysState.COM = USB_MODE;
         break;
       }
 		}
@@ -145,7 +145,7 @@ int main(void)
 		if(SysTime.SysTimeFLG1s){
 			SysTime.SysTimeFLG1s = 0;
       if(SysTime.SysTimeCNT1s >= 5){    //不连接USB，持续上电5秒进入BLE模式
-        SysState = BLE_MODE;
+        SysState.COM = BLE_MODE;
         break;
       }
 		}
@@ -176,6 +176,7 @@ int main(void)
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
       UartRecTask();
+      BLEMonitorTask();
       KeyboardLedTask();
       if((SysTime.SysTimeCNT10ms & 1) == 0){ //50Hz
         BackLedTask();

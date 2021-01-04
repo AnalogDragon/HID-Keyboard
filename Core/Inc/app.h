@@ -18,6 +18,7 @@ void ModeChangeTask(void);
 void KeyboardLedTask(void);
 void BackLedTask(void);
 void UartRecTask(void);
+void BLEMonitorTask(void);
 
 
 
