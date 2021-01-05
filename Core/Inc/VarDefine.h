@@ -291,7 +291,7 @@ union SAVEDATA_ALL_UNO{
 extern uint8_t NeedtoSave;
 extern union SAVEDATA_ALL_UNO SaveData;
 
-
+extern uint8_t BatteryLevel;
 
 
 

@@ -105,6 +105,7 @@ uint8_t NeedtoSave = 0;
 union SAVEDATA_ALL_UNO SaveData;
 
 
+uint8_t BatteryLevel = 10;
 
 
 

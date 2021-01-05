@@ -39,6 +39,8 @@ extern "C" {
 #include "LED.h"
 #include "uart.h"
 #include "DataSave.h"
+#include "bat.h"
+  
   
 //IO口操作宏定义
 #define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2)) 

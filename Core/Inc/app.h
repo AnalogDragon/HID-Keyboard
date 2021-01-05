@@ -20,6 +20,7 @@ void BackLedTask(void);
 void UartRecTask(void);
 void BLEMonitorTask(void);
 void SaveDataTask(void);
+void BatteryTask(void);
 
 
 void InitData(void);

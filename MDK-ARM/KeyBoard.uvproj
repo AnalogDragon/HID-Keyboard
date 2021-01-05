@@ -446,6 +446,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\DataSave.c</FilePath>
             </File>
+            <File>
+              <FileName>bat.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bat.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
