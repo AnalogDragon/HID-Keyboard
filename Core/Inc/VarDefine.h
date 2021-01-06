@@ -138,16 +138,10 @@ struct SysTime_REG
 #define Keyboard_Apps             101 // Keyboard Application
 
 
-#define BLEK_Disconnect           110
-#define BLEK_ConnectID1           111
-#define BLEK_ConnectID2           112
-#define BLEK_ConnectID3           113
-#define BLEK_ConnectID4           114
-#define BLEK_ConnectID5           115
-#define BLEK_ConnectID6           116
-#define BLEK_ConnectID7           117
-#define BLEK_ConnectID8           118
-#define BLEK_ClearBind            119
+#define BLEK_Idle                 110
+#define BLEK_Disconnect           111
+#define BLEK_ClearBind            112
+#define BLEK_WhitelistOFF         113
 
 
 #define Mediakey_mute             200
@@ -221,8 +215,9 @@ struct BLE_STATE_DEF{
   
   uint8_t LinkID      :4;
   uint8_t LinkSta     :1;
-  uint8_t ReSendReq   :1;
-  uint8_t res0        :2;
+  uint8_t Timeout     :1;
+  uint8_t NeedReset   :1;
+  uint8_t res0        :1;
   
   uint8_t res1        :8;
   uint8_t res2        :8;
@@ -236,6 +231,7 @@ union BLE_STATE_UNI{
 extern union BLE_STATE_UNI BleState;
 
 extern uint8_t BLE_CMD;
+extern uint8_t BLE_CMD_BAK;
 
 /*----------------------------*/
 
@@ -254,7 +250,7 @@ extern struct SYSSTATE_DEF SysState;
 
 //不同模式发送的长度
 #define USB_MODE_LEN 60 //usb 模式最多可60键无冲
-#define BLE_MODE_LEN 20 //ble 模式最多可20键无冲
+#define BLE_MODE_LEN 12 //ble 模式最多可12键无冲
 
 
 

@@ -55,6 +55,13 @@ void SetPowerBLE(uint8_t sta){
 }
 
 
+void Shutdown(void){
+  SetPowerBLE(0);
+  SetPower(0);
+  HAL_NVIC_SystemReset();
+  while(1);
+}
+
 //计算CRC
 uint16_t CRCCheck(uint8_t *pData, uint16_t Size){
   uint16_t crc_result = 0xFFFF;
@@ -248,9 +255,18 @@ void UartRecTask(void){
             break;
           
         } //end of switch
-        
       }//end of verify
+      else{   //接收失败
+        if(huart1.gState == HAL_UART_STATE_READY){
+          HAL_UART_Transmit_IT(&huart1, UsartTxBuffer, huart1.TxXferSize);
+        }
+      }
       
+    }
+    else{
+      if(huart1.gState == HAL_UART_STATE_READY){
+        HAL_UART_Transmit_IT(&huart1, UsartTxBuffer, huart1.TxXferSize);
+      }
     }
     huart1.RxDataSize = 0;
   }//end of data get
@@ -289,6 +305,7 @@ void BLEMonitorTask(void){
       //wait power on 1s
       if(GetDtTime(time, SysTime.SysTimeCNT10ms) > 100){
         time = SysTime.SysTimeCNT10ms;
+        memset(BleState.all, 0, sizeof(BleState.all));
         SysState.BLE = 1;
         step ++;
       }
@@ -304,7 +321,7 @@ void BLEMonitorTask(void){
       
     case 3:
       //idle
-      if(BLEErrCnt > 20){
+      if(BLEErrCnt > 20 || BleState.bit.NeedReset){
         //20次数据包丢失
         memset(KeyboardOutData,0,sizeof(KeyboardOutData));
         memset(BleState.all, 0, sizeof(BleState.all));
@@ -313,6 +330,10 @@ void BLEMonitorTask(void){
         SetKeyboardLED(0);
         time = SysTime.SysTimeCNT10ms;
         step ++;
+        BLE_CMD_BAK = BLE_CMD;
+      }
+      if(BleState.bit.Timeout){
+        Shutdown();
       }
       break;
       
@@ -357,7 +378,6 @@ void SaveDataTask(void){
 
 void BatteryTask(void){
   BatteryLevel = BatteryConv();
-  
 }
 
 

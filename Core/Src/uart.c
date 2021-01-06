@@ -27,9 +27,11 @@ void SendBLE(uint8_t mode){
     BLEErrCnt = 0;
   
   NeedSend = 0;
+  if(BLE_CMD == 0)BLE_CMD_BAK = 0;
+  if(BLE_CMD_BAK !=  BLE_CMD)temp = BLE_CMD & 0x0F;
   UsartTxBuffer[0] = UART_HEAR_TX;  //head
   UsartTxBuffer[1] = UART_BLE_ADDR;  //address
-  UsartTxBuffer[3] = BLE_CMD;     //CMD
+  UsartTxBuffer[3] = temp | (BatteryLevel << 4);     //BAT | CMD
   UsartTxBuffer[4] = key_buff3; //media
   UsartTxBuffer[5] = key_buff2; //GUI
   memcpy(&UsartTxBuffer[6], key_buff, BLE_MODE_LEN);
@@ -50,13 +52,14 @@ void SendBLE(uint8_t mode){
 
 //获取BLE数据
 void GetBLE(void){
-  uint8_t Len;
   
   BLERxTime = SysTime.SysTimeCNT100ms;
   BLETxFlag = 0;
   
-  Len = (huart1.pRxOutPtr[2] > sizeof(BleState.all)) ? sizeof(BleState.all) : huart1.pRxOutPtr[2];
-  memcpy(BleState.all, &huart1.pRxOutPtr[3], Len);
+  for(uint8_t i=0;i<sizeof(BleState.all);i++){
+    if(huart1.pRxOutPtr[2] > i)BleState.all[i] = huart1.pRxOutPtr[3+i];
+    else BleState.all[i] = 0;
+  }
   
   if(SysState.COM == BLE_MODE){
     
@@ -65,13 +68,11 @@ void GetBLE(void){
       KeyboardOutData[0] = 1;
       KeyboardOutData[1] = BleState.bit.LEDState;
     }
-    
-    //重发
-    if(BleState.bit.ReSendReq){
-      if(huart1.gState == HAL_UART_STATE_READY){
-        HAL_UART_Transmit_IT(&huart1, UsartTxBuffer, huart1.TxXferSize);
-      }
+    else{
+      KeyboardOutData[0] = 1;
+      KeyboardOutData[1] = 0;
     }
+    
   }
 }
 

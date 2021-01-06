@@ -34,6 +34,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define IO_DEBUG 0
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -81,8 +83,6 @@ static void MX_USART2_UART_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
-  
-#define IO_DEBUG 0
 
 int main(void)
 {
@@ -136,6 +136,7 @@ int main(void)
 		
 		if(SysTime.SysTimeFLG10ms){
 			SysTime.SysTimeFLG10ms = 0;
+      BatteryTask();
       if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED){  //连接上USB直接判断为USB模式
         SysState.COM = USB_MODE;
         break;

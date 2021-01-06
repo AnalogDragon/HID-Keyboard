@@ -124,11 +124,11 @@ uint8_t CheckKeyMediaValue(uint8_t Val){
 
 //ÅÐ¶ÏBLE
 uint8_t CheckKeyBLEValue(uint8_t Val){
-  const uint8_t KeyMin = BLEK_Disconnect;
-  const uint8_t KeyMax = BLEK_ClearBind;
+  const uint8_t KeyMin = BLEK_Idle;
+  const uint8_t KeyMax = BLEK_WhitelistOFF;
   
   if(Val >= KeyMin && Val <= KeyMax){
-    return Val;
+    return Val - BLEK_Idle;
   }
   return 0;
 }
@@ -152,16 +152,14 @@ void AddKeyValue(uint8_t Value){
   
   temp = CheckKeyMediaValue(Value);
   if(temp != 0){
-    key_buff3 |= temp;
+    key_buff3 = temp;
     key_fresh |= 2; //media
     return;
   }
   
   temp = CheckKeyBLEValue(Value);
   if(temp != 0){
-    if(BLE_CMD == 0){
-      BLE_CMD = temp;
-    }
+    BLE_CMD = temp;
     return;
   }
   
@@ -195,8 +193,10 @@ void SubKeyValue(uint8_t Value){
   
   temp = CheckKeyMediaValue(Value);
   if(temp != 0){
-    key_buff3 &= ~temp;
-    key_fresh |= 2; //media
+    if(key_buff3 == temp){
+      key_buff3 = 0;
+      key_fresh |= 2; //media
+    }
     return;
   }
   

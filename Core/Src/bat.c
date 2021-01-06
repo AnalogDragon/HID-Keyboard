@@ -79,9 +79,7 @@ void ADCGet(void){
 }
 
 
-/*
-  输出电池电量，0-10
-*/
+//输出电池电量，0-10
 uint8_t BatteryConv(void){
 	uint8_t i = 0;
 	static uint8_t PowerBak = 10;

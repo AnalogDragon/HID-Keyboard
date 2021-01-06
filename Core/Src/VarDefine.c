@@ -97,6 +97,7 @@ union BLE_STATE_UNI BleState;
 
 //BLE∑¢ÀÕ√¸¡Ó
 uint8_t BLE_CMD = 0;
+uint8_t BLE_CMD_BAK = 0;
 
 struct SYSSTATE_DEF SysState = {0};
 
